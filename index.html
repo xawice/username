@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+<!-- Предзагрузка всех ресурсов для мгновенной работы -->
+<link rel="prefetch" href="https://i.ibb.co/tpDtb8wn/IMG-20261007-120234-257.jpg">
+<link rel="prefetch" href="https://i.ibb.co/C3JcgVVf/IMG-20261007-120441-379.jpg">
+<link rel="prefetch" href="https://i.ibb.co/RGs7n8Hw/1000117617.png">
+<link rel="prefetch" href="https://raw.githubusercontent.com/xawice/music/main/vivideo-gif-maker.gif">
+<link rel="prefetch" href="https://raw.githubusercontent.com/Darknetik404/music/main/vivideo-mp4-to-gif.gif">
+<link rel="prefetch" href="https://i.ibb.co/Jjw5HvhG/IMG-20261007-132905.jpg">
+<link rel="prefetch" href="https://i.ibb.co/KcTNH71L/IMG-20261007-173103.jpg">
+<link rel="prefetch" href="https://i.ibb.co/fVQNBWGS/IMG-20261007-190942.jpg">
+<link rel="prefetch" href="https://i.ibb.co/HLJyLYnp/IMG-20261007-190928.jpg">
+<link rel="prefetch" href="https://i.ibb.co/j9ZMGtWh/images.jpg">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: fixed;
+    touch-action: none;
+    background: #030508;
+}
+
+.background {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    object-fit: cover;
+    object-position: center;
+    pointer-events: none;
+    filter: brightness(0.65) contrast(1.1);
+}
+
+/* --- АВАТАРКА --- */
+.photo {
+    position: fixed;
+    top: 25px;
+    left: 20px;
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 20;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.85);
+}
+
+.photo:active {
+    transform: scale(0.94);
+}
+
+/* --- МОДАЛЬНОЕ ОКНО ФОТО --- */
+.lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 100;
+}
+
+.lightbox.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.lightbox img {
+    width: 85vw;
+    max-width: 400px;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 25px;
+    transform: scale(0.8);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.95);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.lightbox.active img {
+    transform: scale(1);
+}
+
+.profile {
+    position: fixed;
+    top: 25px;
+    left: 193px;      /* Смещено правее */
+    right: 15px;      
+    color: rgba(255,255,255,0.85);
+    font-family: monospace;
+    text-align: left;
+}
+
+.nickname {
+    width: 100%;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: -26px; 
+    /* Черная обводка ника для максимальной выразительности */
+    color: #ffffff;
+    text-shadow: 
+        -1px -1px 0 #000,  
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000,
+         0 2px 10px rgba(0,0,0,0.95);
+}
+
+.tg-emoji {
+    height: 38px;
+    width: auto;
+    object-fit: contain;
+    vertical-align: middle;
+    display: inline-block;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+    transform: translateY(4px);
+}
+
+.status {
+    width: 100%;
+    margin-top: 4px;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-align: left;
+    padding-left: 2px;
+    /* Стильный цвет статуса под общую эстетику */
+    color: #7b93b6;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.95), 0 0 10px rgba(123, 147, 182, 0.25);
+}
+
+/* --- АУДИО КАРТОЧКА --- */
+.audio-card {
+    position: fixed;
+    top: 90px;       
+    left: 185px;      
+    right: 15px;      
+    height: 85px;     
+    background: linear-gradient(145deg, #0d1218, #070a0f);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 14px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.03);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    z-index: 10;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.audio-card:active {
+    transform: scale(0.96);
+}
+
+.card-cover {
+    width: 68px;
+    height: 68px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.7);
+    filter: brightness(0.9);
+}
+
+.card-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    text-align: left;
+    flex-grow: 1;
+    min-width: 0;
+    gap: 6px;
+}
+
+.track-meta-top {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.card-sub {
+    color: #61728a;
+    font-family: sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-title {
+    color: #e2e8f0;
+    font-family: sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ctrl-btn {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.02);
+    color: #61728a;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, transform 0.1s;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.ctrl-btn:active {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    transform: scale(0.9);
+}
+
+.ctrl-btn-t {
+    background: rgba(255,255,255,0.04);
+    color: #61728a;
+    font-weight: 600;
+}
+
+/* --- МОДАЛЬНОЕ ОКНО ТЕКСТА --- */
+.lyrics-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 4, 7, 0.82);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    padding: 40px 20px 20px 20px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.lyrics-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.lyrics-header {
+    text-align: center;
+    margin-bottom: 15px;
+    flex-shrink: 0;
+    width: 100%;
+}
+
+.lyrics-scroll-container {
+    width: 100%;
+    max-width: 500px;
+    flex-grow: 1;
+    overflow-y: auto;
+    position: relative;
+    text-align: center;
+    -webkit-overflow-scrolling: touch;
+    padding-top: 10px;
+    padding-bottom: 50vh;
+}
+
+.lyrics-scroll-container::-webkit-scrollbar {
+    display: none;
+}
+
+.lyrics-track-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.lyrics-line {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.75);
+    padding: 8px 15px;
+    line-height: 1.4;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+}
+
+/* --- БАННЕР-ГИФКА --- */
+.banner-card {
+    position: fixed;
+    top: 190px;
+    left: 20px;
+    right: 20px;
+    height: 110px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.8);
+    background: transparent;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.banner-card:active {
+    transform: scale(0.97);
+}
+
+.banner-img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+    filter: brightness(0.85) contrast(1.05);
+}
+
+.banner-img.active {
+    opacity: 1;
+}
+
+/* --- ЦИТАТА --- */
+.quote {
+    position: fixed;
+    top: 315px;
+    left: 20px;
+    right: 20px;
+    background: linear-gradient(145deg, #0d1218, #070a0f);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 14px;
+    padding: 12px 16px;
+    color: rgba(255,255,255,0.75);
+    font-family: sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: left;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.8);
+}
+
+/* --- ИНФОБЛОК --- */
+.info-box {
+    position: fixed;
+    top: 390px;
+    left: 20px;
+    right: 20px;
+    background: linear-gradient(145deg, #0d1218, #070a0f);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 14px;
+    padding: 14px 16px;
+    color: rgba(255,255,255,0.7);
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.8);
+    max-height: calc(100dvh - 415px);
+    overflow-y: auto;
+}
+
+.blur {
+    color: transparent;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.tg-link {
+    color: #5d8be6;
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(93, 139, 230, 0.4);
+}
+</style>
+</head>
+
+<body>
+
+<img class="background" src="https://i.ibb.co/tpDtb8wn/IMG-20261007-120234-257.jpg">
+
+<!-- Аватарка -->
+<img class="photo" id="avatarImg" src="https://i.ibb.co/C3JcgVVf/IMG-20261007-120441-379.jpg" onclick="openLightbox()">
+
+<!-- Модальное окно фото -->
+<div class="lightbox" id="lightboxModal" onclick="closeLightbox()">
+    <img src="https://i.ibb.co/C3JcgVVf/IMG-20261007-120441-379.jpg" alt="full photo">
+</div>
+
+<div class="profile">
+    <div class="nickname">
+        𝚡𝚊𝚠𝚒𝚌𝚎 <img class="tg-emoji" src="https://i.ibb.co/RGs7n8Hw/1000117617.png" alt="emoji">
+    </div>
+    <div class="status">offline</div>
+</div>
+
+<div class="audio-card" id="playBtn" onclick="togglePlay()">
+    <img class="card-cover" id="cardCover" src="https://i.ibb.co/Jjw5HvhG/IMG-20261007-132905.jpg" alt="cover">
+    
+    <div class="card-info">
+        <div class="track-meta-top">
+            <div class="card-sub" id="cardSub">sqaute</div>
+            <div class="card-title" id="cardTitle">Не забывай</div>
+        </div>
+
+        <div class="card-controls">
+            <button class="ctrl-btn" onclick="event.stopPropagation(); prevTrack()" title="Назад">⏮</button>
+            <button class="ctrl-btn" id="playPauseBtn" onclick="event.stopPropagation(); togglePlay()" title="Плей/Пауза">▶</button>
+            <button class="ctrl-btn" onclick="event.stopPropagation(); nextTrack()" title="Вперед">⏭</button>
+            <button class="ctrl-btn ctrl-btn-t" id="lyricsToggleBtn" style="display: none;" onclick="event.stopPropagation(); openLyrics()" title="Текст">Т</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно текста -->
+<div class="lyrics-overlay" id="lyricsModal" onclick="closeLyrics()">
+    <div class="lyrics-header">
+        <div style="color: #fff; font-family: sans-serif; font-size: 14px; font-weight: 600; text-shadow: 0 2px 6px rgba(0,0,0,0.8);" id="modalTrackTitle">Не забывай</div>
+        <div style="color: #788aA5; font-family: sans-serif; font-size: 11px; margin-top: 1px; text-shadow: 0 2px 6px rgba(0,0,0,0.8);" id="modalTrackArtist">sqaute</div>
+    </div>
+    
+    <div class="lyrics-scroll-container" id="lyricsScrollContainer">
+        <div class="lyrics-track-list" id="lyricsList"></div>
+    </div>
+</div>
+
+<!-- БАННЕР-ГИФКА -->
+<div class="banner-card" onclick="changeBanner()">
+    <img class="banner-img active" src="https://raw.githubusercontent.com/xawice/music/main/vivideo-gif-maker.gif" alt="banner">
+    <img class="banner-img" src="https://raw.githubusercontent.com/Darknetik404/music/main/vivideo-mp4-to-gif.gif" alt="banner">
+</div>
+
+<div class="quote">
+    Люблю её, как воспоминание, которое не хочет исчезать.
+</div>
+
+<div class="info-box">
+    <div>:# name — <span class="blur">Alexander</span></div>
+    <div>:# age — <span class="blur">19</span></div>
+    <div>:# user — @xawice</div>
+    <div>:# country — Ukraine</div>
+    <div>:# city — <span class="blur">Dnipro</span></div>
+    <div>:# number — +380<span class="blur">991234567</span></div>
+    <div>:# status — offline</div>
+    <div>:# vibe — dark aesthetic</div>
+    <div>:# note — i'm a dumbass</div>
+    <div style="margin-top: 6px;">my socials:</div>
+    <div>tg info - <a href="https://t.me/xawaix/7" target="_blank" class="tg-link">press</a></div>
+</div>
+
+<audio id="myAudio" crossorigin="anonymous" preload="auto"></audio>
+
+<script>
+    const tracks = [
+        {
+            title: "Не забывай",
+            artist: "sqaute",
+            src: "https://darknetik404.github.io/music/Не-забывай.m4a",
+            cover: "https://i.ibb.co/Jjw5HvhG/IMG-20261007-132905.jpg"
+        },
+        {
+            title: "холод",
+            artist: "shadowraze",
+            src: "https://raw.githubusercontent.com/xawice/music/main/Shadowraze_%D1%85%D0%BE%D0%BB%D0%BE%D0%B4_SlowedReverb_%40speedupmebot_%40speedupmebot%20(1).mp3",
+            cover: "https://i.ibb.co/KcTNH71L/IMG-20261007-173103.jpg"
+        },
+        {
+            title: "Вечно",
+            artist: "sqaute",
+            src: "https://raw.githubusercontent.com/xawice/music/main/%D0%92%D0%B5%D1%87%D0%BD%D0%BE.m4a",
+            cover: "https://i.ibb.co/fVQNBWGS/IMG-20261007-190942.jpg"
+        },
+        {
+            title: "Под снегом",
+            artist: "чувствую себя во сне",
+            src: "https://raw.githubusercontent.com/xawice/music/main/%D0%9F%D0%BE%D0%B4%20%D1%81%D0%BD%D0%B5%D0%B3%D0%BE%D0%BC%20(ft.%205killo).m4a",
+            cover: "https://i.ibb.co/HLJyLYnp/IMG-20261007-190928.jpg"
+        },
+        {
+            title: "спокойной ночи",
+            artist: "fallen777angel",
+            src: "https://raw.githubusercontent.com/xawice/music/main/%D1%81%D0%BF%D0%BE%D0%BA%D0%BE%D0%B9%D0%BD%D0%BE%D0%B9%20%D0%BD%D0%BE%D1%87%D0%B8%20(%40speedupmebot).mp3",
+            cover: "https://i.ibb.co/j9ZMGtWh/images.jpg"
+        }
+    ];
+
+    let currentBannerIndex = 0;
+
+    function changeBanner() {
+        const bannerImgs = document.querySelectorAll('.banner-img');
+        bannerImgs[currentBannerIndex].classList.remove('active');
+        currentBannerIndex = (currentBannerIndex + 1) % bannerImgs.length;
+        bannerImgs[currentBannerIndex].classList.add('active');
+    }
+
+    const neZabyvayLyrics = [
+        "Не забывай, то, как моё сердце когда-то билось",
+        "Не забывай, как ты в меня когда-то там влюбилась",
+        "Не забывай цвет моих глаз и даже моё имя",
+        "Не забывай, что я любил тебя сильнее (Жизни)",
+        "",
+        "Не забывай мои глаза, когда я сдохну",
+        "Прошу тебя, помни меня хотя бы немного",
+        "Прости, что не могу сейчас вытереть слезы",
+        "Что падают на пол у моего старого гроба",
+        "",
+        "Не забывай мои глаза, когда я сдохну",
+        "Ты приходила к моей маме, так тихо там дома",
+        "То время уже не вернуть — её сын мёртвый",
+        "Я так боюсь, что все забудут меня, да и кто я",
+        "",
+        "Не забывай мои глаза, я знаю будет больно",
+        "Со временем забудешь даже мой проклятый голос",
+        "Ты позвонишь, но уже будет недоступен номер",
+        "С которого всегда желал тебе спокойной ночи",
+        "",
+        "Во всех книжках за место моего имени — прочерк",
+        "Прости уже не вывозил — решил поставить точку",
+        "Мою жизнь наполняла боль, ты знаешь, чего хочешь",
+        "Последняя фотка со мной напомнит тебе многое",
+        "",
+        "Прошу не забывай меня, когда дождусь конца",
+        "Я навсегда запомню твои милые слова",
+        "Надеюсь, что прийду к тебе, хотя бы, я во снах",
+        "И не скажу ничего, всё поймешь ты по глазам",
+        "",
+        "Меня не станет, будут плакать наши небеса",
+        "Отпустит, когда прийдет время, не забудь меня",
+        "Просто ты мне пообещай и я уйду в слезах",
+        "Они будут от счастья, теперь я твой навсегда",
+        "",
+        "Не забывай мои глаза, когда я сдохну",
+        "Прошу тебя, помни меня хотя бы немного",
+        "Прости, что не могу сейчас вытереть слезы",
+        "Что падают на пол у моего старого гроба",
+        "",
+        "Не забывай мои глаза, когда я сдохну",
+        "Ты приходила к моей маме, так тихо там дома",
+        "То время уже не вернуть — её сын мёртвый",
+        "Я так боюсь, что все забудут меня, да и кто я",
+        "",
+        "Ты просыпаешься в слезах — тебе приснился я",
+        "Меня несут в гробу в костюме, кожа бледная",
+        "Никто не ожидал, что так уйдет простой пацан",
+        "Который просто хотел жить, не забывай меня",
+        "",
+        "Не забывай меня, не забывай про нас",
+        "Прошу не забывай (Прошу не забывай)",
+        "Не забывай меня, не забывай про нас",
+        "Прошу не забывай (Прошу не забывай)"
+    ];
+
+    const coldLyrics = [
+        "Потерял весь мир, забыл себя, я тону в омуте",
+        "Глаза как у ребёнка, и я забываю голос твой",
+        "Как снег февральским утром, я весь покрытый холодом",
+        "Мой разум помутнел, и я вновь теряю голову",
+        "Ты посмотри в мои глаза, ха, сколько видишь боли в них?",
+        "Со мною небеса, твой взор убил меня, я вновь поник",
+        "Я рад был умереть, запомнив твой чудесный лик",
+        "И если я умру еще раз — я умру за нас двоих",
+        "И если ты растаешь — я зажгу снова пожар",
+        "Случайно потеряешь — обойду весь земной шар",
+        "Внезапно если будет больно — я приму любой удар",
+        "Всегда держа тебя за руку — выживу в любой кошмар",
+        "С тобой снова живой, и в груди горят эти огни",
+        "И звёзды нам напомнят, почему мы не одни",
+        "Мы как бушующее море, в нем с тобой мы корабли",
+        "И даже в самой худшей ссоре умоляю не уйди",
+        "Не уходи, прошу, останься, подари немного времени",
+        "Весь год идет так холодно, но я согрею, верь в меня",
+        "Прости за все, что сказано, и правда без сомнения",
+        "Свети все так же ярко, мое солнце, я люблю тебя",
+        "Потерял весь мир, забыл себя, я тону в омуте",
+        "Глаза как у ребёнка, и я забываю голос твой",
+        "Как снег февральским утром, я весь покрытый холодом",
+        "Мой разум помутнел, и я вновь теряю голову",
+        "Ты посмотри в мои глаза, ха, сколько видишь боли в них?",
+        "Со мною небеса, твой взор убил меня, я вновь поник",
+        "Я рад был умереть, запомнив твой чудесный лик",
+        "И если я умру еще раз — я умру за нас двоих"
+    ];
+
+    const vechnoLyrics = [
+        "Пустота в моих глазах, я ищу тебя везде",
+        "Но встретить тебя — главный страх, скитаюсь на душевном дне",
+        "И если б умер — был бы рад, надеюсь буду в вечном сне",
+        "Моя душа давно пуста, но сердце щас горит в огне",
+        "Скажи, зачем была рядом, когда мне было так плохо?",
+        "Ты была милой неряхой — не мог ни сделать не вдоха",
+        "Скажи, зачем была рядом? Ведь мне теперь одиноко",
+        "Прости, не могу забыть тебя уже слишком долго",
+        "Прости пожалуйста, но я был счастлив так только с тобой",
+        "И для любой другой девчонки — я теперь просто немой",
+        "Не остаюсь наедине никогда больше сам с собой",
+        "Ведь мысли пожирают сильно, я теперь просто пустой",
+        "Вокруг так много милых пар, но у меня теперь покой",
+        "Не знал, что будет тяжело, походу я теперь больной",
+        "Я не нашёл себе другую, но давно уже не твой",
+        "Но ты нашла себе другого — больше не верю в любовь",
+        "Худая бледная дура — была такой по натуре",
+        "Я думал, что я tвой дурак, но оказался придурком",
+        "Спасибо, что дала опыт, мне так нужна была EXP'а",
+        "Но жаль, что ты не поняла",
+        "Что я хотел просто счастья, а не разбитого сердца",
+        "Что я хотел просто рядом, чтоб ты была со мной вечно",
+        "Чтоб ты была со мной вечно"
+    ];
+
+    const podSnegomLyrics = [
+        "Ты был моим теплом в эту холодную зиму, но теперь мороз не только за окном, но и в твоих глазах.",
+        "",
+        "Смотришь с высоты, я здесь один, я снова болен",
+        "В белой комнате огни, моя душа уже уходит",
+        "На улице зима, надеюсь меня снег накроет",
+        "Я уйду туда, где ветер меня не догонит",
+        "I стою посреди моря будто бы среди небес",
+        "Напротив меня ангел, а напротив тебя бес",
+        "I don't see dreams, в голове дремучий лес",
+        "Эти мертвые сады, там когда-то я воскрес",
+        "",
+        "Не-не убивай меня, ты оставишь холод",
+        "В моей душе не было чувств, теперь их очень много",
+        "В твоих объятях - мне очень спокойно",
+        "Твои нежные губы, я чувствую голод",
+        "",
+        "Он хотел летать, но он уже высоко... И вам его не достать.",
+        "",
+        "Упорюсь какой-то хренью, от которой меня прёт",
+        "Взорвусь в своей фантазии, быть с тобою - не идёт",
+        "Сердце кровью изливается, и глаза горят",
+        "Но не от чувств сильных, внутри меня чистый яд",
+        "Упорюсь какой-то хренью, от которой меня прёт",
+        "Взорвусь в своей фантазии, быть с тобою - не идёт",
+        "Сердце кровью изливается, и глаза горят",
+        "Но не от чувств сильных, внутри меня чистый яд",
+        "",
+        "Не-не убивай меня, ты оставишь холод",
+        "В моей душе не было чувств, теперь их очень много",
+        "В твоих объятях - мне очень спокойно",
+        "Твои нежные губы, я чувствую голод",
+        "Не убивай меня, ты оставишь холод",
+        "В моей душе не было чувств, теперь их очень много",
+        "В твоих объятях - мне очень спокойно",
+        "Твои нежные губы, я чувствую голод"
+    ];
+
+    const spokoinoiNochiLyrics = [
+        "Каждый сон с тобою ужаснее самых страшных кошмаров",
+        "Я просыпаюсь без тебя с чувством словно обманут",
+        "В моём телефоне пусто, до чего же я жалок?",
+        "И я всё ещё надеюсь, чтоб ты мне написала",
+        "",
+        "Ранить больше не хочу, но в кармане Battle Fury",
+        "Вы не слушайте меня, я буду долго бесцензурен",
+        "Глубоко мечтаю, чтобы всё-таки вернули",
+        "И объятие простое сможет вытащить из бури",
+        "",
+        "Я во снах вижу часто, моё сердце погасло",
+        "Твои глаза так прекрасны, но я не хочу больше",
+        "Так любить тебя напрасно, убиваться без повода",
+        "Всё заново терять и остаться лишь с голодом",
+        "",
+        "Почему ты не должен убегать?",
+        "Потому что побег тоже причиняет боль",
+        "Даже если убегаешь от чего-то более страшного?",
+        "Я не вынесу этого",
+        "",
+        "Я писал доброе утро, спокойной ночи и прочее",
+        "В ответ один лишь холод, сообщения стали короче",
+        "И я так заебался, чего же хочешь ты?",
+        "Двигаться вперёд или полностью же напротив",
+        "",
+        "Я засыпал в твоих объятиях, просыпался тоже в них",
+        "Каждый раз я замирал, увидев твой чудесный лик",
+        "Теперь осколки памяти не дают спокойно жить",
+        "Когда сказал, что не люблю, я предавался глупой лжи",
+        "",
+        "В то же время сомнения окружили, как демоны",
+        "С каждым словом твоим ты создавала мне трещины",
+        "Думал, ты снова пришла, но мне опять померещилось",
+        "И в других тебя видеть я продолжать буду вечность",
+        "",
+        "Я во снах вижу часто, моё сердце погасло",
+        "Твои глаза так прекрасны, но я не хочу больше",
+        "Так любить тебя напрасно, убиваться без повода",
+        "Всё заново терять и остаться лишь с голодом"
+    ];
+
+    let currentTrackIndex = 0;
+
+    const audio = document.getElementById('myAudio');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const cardTitle = document.getElementById('cardTitle');
+    const cardSub = document.getElementById('cardSub');
+    const cardCover = document.getElementById('cardCover');
+    const modal = document.getElementById('lightboxModal');
+    const lyricsToggleBtn = document.getElementById('lyricsToggleBtn');
+    const lyricsModal = document.getElementById('lyricsModal');
+    const lyricsList = document.getElementById('lyricsList');
+    const modalTrackTitle = document.getElementById('modalTrackTitle');
+    const modalTrackArtist = document.getElementById('modalTrackArtist');
+
+    const iconPlay = '▶';
+    const iconPause = '❚❚';
+
+    function renderLyrics(lyricsArray) {
+        lyricsList.innerHTML = '';
+        lyricsArray.forEach((text) => {
+            const div = document.createElement('div');
+            div.className = 'lyrics-line';
+            div.innerText = text;
+            lyricsList.appendChild(div);
+        });
+    }
+
+    function loadTrack(index) {
+        const track = tracks[index];
+        audio.src = track.src;
+        cardTitle.innerText = track.title;
+        cardSub.innerText = track.artist;
+        cardCover.src = track.cover;
+        
+        modalTrackTitle.innerText = track.title;
+        modalTrackArtist.innerText = track.artist;
+
+        if (track.title.toLowerCase() === "не забывай") {
+            renderLyrics(neZabyvayLyrics);
+            lyricsToggleBtn.style.display = "flex";
+        } else if (track.title.toLowerCase() === "холод") {
+            renderLyrics(coldLyrics);
+            lyricsToggleBtn.style.display = "flex";
+        } else if (track.title.toLowerCase() === "вечно") {
+            renderLyrics(vechnoLyrics);
+            lyricsToggleBtn.style.display = "flex";
+        } else if (track.title.toLowerCase() === "под снегом") {
+            renderLyrics(podSnegomLyrics);
+            lyricsToggleBtn.style.display = "flex";
+        } else if (track.title.toLowerCase() === "спокойной ночи") {
+            renderLyrics(spokoinoiNochiLyrics);
+            lyricsToggleBtn.style.display = "flex";
+        } else {
+            lyricsToggleBtn.style.display = "none";
+            closeLyrics();
+        }
+
+        audio.load();
+    }
+
+    function togglePlay() {
+        if (audio.paused) {
+            if (!audio.src) {
+                loadTrack(currentTrackIndex);
+            }
+            audio.play().then(() => {
+                playPauseBtn.innerText = iconPause;
+            }).catch(error => {
+                console.error(error);
+            });
+        } else {
+            audio.pause();
+            playPauseBtn.innerText = iconPlay;
+        }
+    }
+
+    function nextTrack() {
+        currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+        loadTrack(currentTrackIndex);
+        audio.play().then(() => {
+            playPauseBtn.innerText = iconPause;
+        }).catch(err => console.log(err));
+    }
+
+    function prevTrack() {
+        currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
+        loadTrack(currentTrackIndex);
+        audio.play().then(() => {
+            playPauseBtn.innerText = iconPause;
+        }).catch(err => console.log(err));
+    }
+
+    audio.onended = function() {
+        nextTrack();
+    };
+
+    loadTrack(currentTrackIndex);
+
+    function openLightbox() {
+        modal.classList.add('active');
+    }
+
+    function closeLightbox() {
+        modal.classList.remove('active');
+    }
+
+    function openLyrics() {
+        lyricsModal.classList.add('active');
+    }
+
+    function closeLyrics() {
+        lyricsModal.classList.remove('active');
+    }
+</script>
+
+</body>
+</html>
